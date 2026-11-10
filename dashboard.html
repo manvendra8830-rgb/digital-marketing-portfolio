@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Manvendra</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>Manvendra<span>.</span></h2>
+
+        <nav>
+            <a href="#" class="active">Dashboard</a>
+            <a href="#enquiries">Enquiries</a>
+        </nav>
+
+        <button id="logoutBtn">Logout</button>
+    </aside>
+
+    <main class="main-content">
+
+        
+<header class="dashboard-header">
+    <div>
+        <h1>Dashboard Overview</h1>
+        <p>Welcome back, Manvendra!</p>
+    </div>
+
+    <button id="refreshBtn" type="button">
+        ↻ Refresh
+    </button>
+</header>
+
+
+        <section class="stats">
+            <div class="stat-card">
+                <h3>Total Enquiries</h3>
+                <p id="totalEnquiries">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Client Services</h3>
+                <p id="totalServices">0</p>
+            </div>
+        </section>
+
+        <section id="enquiries" class="enquiries-section">
+            <h2>Recent Client Enquiries</h2>
+            <div class="filter-controls">
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search by name or email..."
+    >
+
+    <select id="serviceFilter">
+        <option value="">All Services</option>
+    </select>
+</div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Service</th>
+                            <th>Budget</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="enquiryTable">
+                        <tr>
+                            <td colspan="5">Loading enquiries...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <p id="dashboardStatus"></p>
+        <div id="enquiryModal" class="modal">
+    <div class="modal-content">
+        <button id="closeModal" type="button">Close ✕</button>
+
+        <h2>Client Enquiry Details</h2>
+
+        <p><strong>Name:</strong> <span id="detailName"></span></p>
+        <p><strong>Email:</strong> <span id="detailEmail"></span></p>
+        <p><strong>Service:</strong> <span id="detailService"></span></p>
+        <p><strong>Budget:</strong> <span id="detailBudget"></span></p>
+        <p><strong>Message:</strong></p>
+        <p id="detailMessage"></p>
+    </div>
+</div>
+
+    </main>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

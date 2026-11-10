@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>Admin Login | Manvendra Portfolio</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <main class="login-container">
+
+        <div class="login-card">
+
+            <div class="login-logo">
+                M<span>.</span>
+            </div>
+
+            <p class="login-label">PRIVATE ADMIN AREA</p>
+
+            <h1>Welcome Back</h1>
+
+            <p class="login-description">
+                Sign in to manage your portfolio and client enquiries.
+            </p>
+
+            <form id="adminLoginForm">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter admin username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter admin password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" id="loginButton">
+                    Sign In Securely ↗
+                </button>
+
+                <p id="loginStatus" role="status"></p>
+
+            </form>
+
+            <a href="index.html" class="back-link">
+                ← Back to Portfolio
+            </a>
+
+        </div>
+
+        <footer>
+            © 2026 Manvendra Singh. Admin Portal.
+        </footer>
+
+    </main>
+
+    <script src="js/admin.js"></script>
+
+</body>
+</html>

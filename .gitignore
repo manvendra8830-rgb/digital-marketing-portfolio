@@ -1,0 +1,17 @@
+
+# Secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+backend/venv/
+
+# Database
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+
+# System files
+.DS_Store
