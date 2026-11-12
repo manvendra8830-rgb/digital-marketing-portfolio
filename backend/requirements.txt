@@ -4,3 +4,5 @@ Flask-Limiter
 python-dotenv
 Flask-Cors
 gunicorn
+
+Flask-WTF
