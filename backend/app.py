@@ -1,3 +1,4 @@
+
 from pathlib import Path
 import os
 import re
@@ -6,7 +7,6 @@ from datetime import timedelta
 
 import psycopg
 from psycopg.rows import dict_row
-
 
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
@@ -33,8 +33,14 @@ if not all([DATABASE_URL, secret_key, admin_username, admin_password_hash]):
 app = Flask(__name__)
 
 is_production = bool(os.getenv("RENDER")) or os.getenv("APP_ENV") == "production"
+
 app.config.update(
     SECRET_KEY=secret_key,
+
+    # Allow cross-domain HTTPS frontend requests.
+    # CSRF token validation remains enabled.
+    WTF_CSRF_SSL_STRICT=False,
+
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="None" if is_production else "Lax",
     SESSION_COOKIE_SECURE=is_production,
@@ -44,12 +50,15 @@ app.config.update(
 
 csrf = CSRFProtect(app)
 
+
 @app.errorhandler(CSRFError)
 def handle_csrf_error(error):
+    app.logger.warning("CSRF validation failed: %s", error.description)
     return jsonify({
         "status": "error",
         "message": "CSRF validation failed. Please refresh and try again."
     }), 400
+
 
 CORS(
     app,
@@ -74,6 +83,7 @@ limiter = Limiter(
     storage_uri="memory://",
 )
 
+
 # PostgreSQL / Neon database
 
 def get_db():
@@ -82,6 +92,7 @@ def get_db():
         row_factory=dict_row,
         connect_timeout=10,
     )
+
 
 def initialize_database():
     with get_db() as connection:
@@ -97,6 +108,7 @@ def initialize_database():
             )
         """)
 
+
 ALLOWED_SERVICES = {
     "SEO", "Google Ads", "Meta Ads",
     "Social Media Marketing", "AI Automation", "Other",
@@ -107,14 +119,17 @@ ALLOWED_BUDGETS = {
     "₹10,000 - ₹25,000", "₹25,000+", "Not decided",
 }
 
+
 def clean_text(value):
     return value.strip() if isinstance(value, str) else ""
+
 
 def validate_email(email):
     return bool(re.fullmatch(
         r"[^@\s]{1,64}@[^@\s]{1,190}\.[^@\s]{2,63}",
         email,
     ))
+
 
 @app.get("/api/health")
 def health():
@@ -123,21 +138,25 @@ def health():
         "message": "Manvendra Portfolio API is running.",
     })
 
+
 @app.get("/api/db-health")
 def database_health():
     try:
         with get_db() as connection:
             connection.execute("SELECT 1")
+
         return jsonify({
             "status": "success",
             "message": "PostgreSQL database connection successful.",
         }), 200
+
     except psycopg.Error:
         app.logger.exception("PostgreSQL health check failed")
         return jsonify({
             "status": "error",
             "message": "Database connection failed.",
         }), 500
+
 
 @app.get("/api/csrf-token")
 def get_csrf_token():
@@ -147,6 +166,7 @@ def get_csrf_token():
     })
     response.headers["Cache-Control"] = "no-store"
     return response
+
 
 @app.post("/api/contact")
 @limiter.limit("5 per minute")
@@ -158,6 +178,7 @@ def contact():
         }), 415
 
     data = request.get_json(silent=True)
+
     if not isinstance(data, dict):
         return jsonify({
             "status": "error",
@@ -175,26 +196,31 @@ def contact():
             "status": "error",
             "message": "Please complete all required fields.",
         }), 400
+
     if not 2 <= len(name) <= 80:
         return jsonify({
             "status": "error",
             "message": "Name must contain 2 to 80 characters.",
         }), 400
+
     if len(email) > 254 or not validate_email(email):
         return jsonify({
             "status": "error",
             "message": "Please enter a valid email address.",
         }), 400
+
     if service not in ALLOWED_SERVICES:
         return jsonify({
             "status": "error",
             "message": "Invalid service selection.",
         }), 400
+
     if budget not in ALLOWED_BUDGETS:
         return jsonify({
             "status": "error",
             "message": "Invalid budget selection.",
         }), 400
+
     if not 10 <= len(message) <= 2000:
         return jsonify({
             "status": "error",
@@ -210,6 +236,7 @@ def contact():
                 """,
                 (name, email, service, budget, message),
             )
+
     except psycopg.Error:
         app.logger.exception("Database insert error")
         return jsonify({
@@ -222,6 +249,7 @@ def contact():
         "message": "Your enquiry has been submitted successfully.",
     }), 201
 
+
 def admin_required(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
@@ -230,13 +258,17 @@ def admin_required(function):
                 "status": "error",
                 "message": "Authentication required.",
             }), 401
+
         return function(*args, **kwargs)
+
     return wrapper
+
 
 @app.route("/api/admin/login", methods=["POST"])
 @limiter.limit("5 per minute")
 def admin_login():
     data = request.get_json(silent=True)
+
     if not isinstance(data, dict):
         return jsonify({
             "status": "error",
@@ -245,6 +277,7 @@ def admin_login():
 
     username = data.get("username", "")
     password = data.get("password", "")
+
     if (
         username != admin_username
         or not isinstance(password, str)
@@ -258,19 +291,23 @@ def admin_login():
     session.clear()
     session["admin_logged_in"] = True
     session.permanent = True
+
     return jsonify({
         "status": "success",
         "message": "Login successful.",
     }), 200
 
+
 @app.route("/api/admin/logout", methods=["POST"])
 @admin_required
 def admin_logout():
     session.clear()
+
     return jsonify({
         "status": "success",
         "message": "Logged out successfully.",
     })
+
 
 @app.route("/api/admin/enquiries", methods=["GET"])
 @admin_required
@@ -299,12 +336,14 @@ def get_admin_enquiries():
                 for row in enquiries
             ],
         })
+
     except psycopg.Error:
         app.logger.exception("Database read error")
         return jsonify({
             "status": "error",
             "message": "Unable to retrieve enquiries.",
         }), 500
+
 
 @app.route("/api/admin/enquiries/<int:enquiry_id>", methods=["DELETE"])
 @admin_required
@@ -316,6 +355,7 @@ def delete_admin_enquiry(enquiry_id):
                 "DELETE FROM enquiries WHERE id = %s",
                 (enquiry_id,),
             )
+
             if cursor.rowcount == 0:
                 return jsonify({
                     "status": "error",
@@ -326,6 +366,7 @@ def delete_admin_enquiry(enquiry_id):
             "status": "success",
             "message": "Enquiry deleted successfully.",
         }), 200
+
     except psycopg.Error:
         app.logger.exception("Database deletion error")
         return jsonify({
@@ -333,8 +374,10 @@ def delete_admin_enquiry(enquiry_id):
             "message": "Unable to delete enquiry.",
         }), 500
 
-# Gunicorn imports this module, so initialize the table at startup here.
+
+# Initialize database when Gunicorn imports this module.
 initialize_database()
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=False)
