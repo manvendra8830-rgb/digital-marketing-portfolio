@@ -1,5 +1,5 @@
 
-const API_URL = "http://127.0.0.1:5000/api";
+const API_URL = "https://manvendra-portfolio-api-2sgr.onrender.com/api";
 
 const loginForm = document.getElementById("adminLoginForm");
 const loginStatus = document.getElementById("loginStatus");
